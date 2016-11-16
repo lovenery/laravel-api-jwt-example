@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\User;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenBlacklistedException;
 
 class ExampleController extends Controller
 {
@@ -32,5 +35,47 @@ class ExampleController extends Controller
 
         // all good so return the token
         return response()->json(compact('token'));
+    }
+
+    public function show()
+    {
+        try {
+            $user = JWTAuth::parseToken()->toUser();
+            if (! $user) {
+                return response()->json(['error' => 'User not found'], 400);
+            }
+        } catch (TokenInvalidException $e) {
+            return response()->json(['error' => 'Token is invalid'], 401);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['error' => 'Token has expired'], 401);
+        } catch (TokenBlacklistedException $e) {
+            return response()->json(['error' => 'Token is blacklisted'], 401);
+        }
+
+         return response()->json($user);
+    }
+
+    public function getToken()
+    {
+        $token = JWTAuth::getToken();
+        if (! $token) {
+            return response()->json(['error' => 'Token is invalid'], 401);
+        }
+        try {
+            $refreshedToken = JWTAuth::refresh($token);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Something went wrong'], 400);
+        }
+
+        return response()->json($refreshedToken);
+    }
+
+    public function destroy()
+    {
+        $user = JWTAuth::parseToken()->authenticate();
+        if (! $user) {
+            return response()->json(['error' => 'Fail the delete provess'], 401);
+        }
+        $user->delete();
     }
 }

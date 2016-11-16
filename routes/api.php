@@ -26,3 +26,10 @@ $api->version('v1', function($api) {
 
     $api->post('authenticate', 'App\Http\Controllers\ExampleController@authenticate');
 });
+
+$api->version('v1', ['middleware' => 'api.auth'], function($api){
+    $api->get('users', 'App\Http\Controllers\ExampleController@index');
+    $api->get('user', 'App\Http\Controllers\ExampleController@show');
+    $api->get('token', 'App\Http\Controllers\ExampleController@getToken');
+    $api->delete('delete', 'App\Http\Controllers\ExampleController@destroy');
+});
