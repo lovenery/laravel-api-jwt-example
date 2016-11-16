@@ -23,4 +23,6 @@ $api->version('v1', function($api) {
         return "Hello";
     });
     $api->get('world', 'App\Http\Controllers\ExampleController@index');
+
+    $api->post('authenticate', 'App\Http\Controllers\ExampleController@authenticate');
 });
